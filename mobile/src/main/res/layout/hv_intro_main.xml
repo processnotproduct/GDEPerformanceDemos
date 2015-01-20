@@ -1,5 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
+                xmlns:kanawish="http://schemas.android.com/apk/res-auto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -8,21 +9,50 @@
                 android:paddingBottom="@dimen/activity_vertical_margin"
                 tools:context=".HVIntroActivity">
 
-    <TextView
-        android:text="@string/hello_world"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:id="@+id/textView"/>
-    <include android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             layout="@layout/hv_intro_chunk_a" android:layout_below="@+id/textView" android:layout_alignParentRight="true"
-             android:layout_alignParentEnd="true" android:id="@+id/include_a"/>
-    <include android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             layout="@layout/hv_intro_chunk_b" android:layout_below="@+id/include_a" android:layout_alignParentLeft="true"
-             android:layout_alignParentStart="true" android:id="@+id/include_b"/>
-    <include android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             layout="@layout/hv_intro_chunk_c" android:layout_below="@+id/include_b" android:layout_centerHorizontal="true"
-             android:layout_marginTop="72dp"/>
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerCrop"
+        android:background="@drawable/bkg_yellow"
+        />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        >
+
+        <!-- -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical">
+            <com.kanawish.perf.hv.CustomView
+                android:id="@+id/completionView"
+                android:layout_width="match_parent"
+                android:layout_height="166dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="5dp"
+                kanawish:numerator="4"
+                kanawish:denominator="10"
+                />
+            <ImageButton
+                android:id="@+id/imgButton"
+                style="?android:borderlessButtonStyle"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/icn_camera_light"
+                android:layout_gravity="center_horizontal"/>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
 
 </RelativeLayout>
