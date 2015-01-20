@@ -33,14 +33,15 @@
             android:orientation="vertical">
             <com.kanawish.perf.hv.CustomView
                 android:id="@+id/completionView"
-                android:layout_width="match_parent"
-                android:layout_height="166dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="5dp"
-                kanawish:numerator="4"
+                kanawish:numerator="5"
                 kanawish:denominator="10"
                 />
+
             <ImageButton
                 android:id="@+id/imgButton"
                 style="?android:borderlessButtonStyle"

@@ -2,6 +2,7 @@ package com.kanawish.perf.hv;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,45 +15,36 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
 
+import com.kanawish.perf.R;
+
 import static android.text.Layout.Alignment;
 
 /**
- * NOTES: Supported tags for HTML-in-char-sequence stylings:
+ * Some useful links if you're looking to create a custom view:
+ *
+ * http://developer.android.com/training/custom-views/index.html
+ *
+ *
+ * NOTE: Supported tags for HTML-in-char-sequence stylings:
  *
  * from https://groups.google.com/forum/#!topic/android-developers/5Mcl4k_ZNcY
  *
-<quote>
- I thought you are using a textview. I don't know if the canvas
- actually supports it.
+ * How to use text Html attributes with your TextView:
 
- do something like
+	 <quote>
+	 I thought you are using a textview. I don't know if the canvas
+	 actually supports it.
 
- myTextView.setText(Html.fromHtml(myHtmlString))
+	 do something like
 
- by the way, I found the list of supported tags:
+	 myTextView.setText(Html.fromHtml(myHtmlString))
 
- •br
- •p
- •div
- •em
- •b
- •strong
- •cite
- •dfn
- •i
- •big
- •small
- •font
- •blockquote
- •tt
- •monospace
- •a
- •u
- •sup
- •sub
-</quote>
+	 by the way, I found the list of supported tags:
 
- * Created by etiennecaron on 2014-05-03.
+	 •br •p •div •em •b •strong •cite •dfn •i •big •small •font •blockquote •tt •monospace •a •u •sup •sub
+	</quote>
+
+ *
  */
 public class CustomView extends View {
 
@@ -77,23 +69,32 @@ public class CustomView extends View {
 	private float centerY;
 	private float centerX;
 
-    // Value attributes
-    private int numerator = 1 ;
-	private int denominator = 10 ;
+	/**
+	 * Value attributes: see attrs.xml, these are defined in a way that allows customization via .xml attributes
+	 */
+    private int numerator = 0 ;
+	private int denominator = 1 ;
 
 	public CustomView(Context context) {
 		super(context);
 		init();
 	}
 
+	/**
+	 * From android SDK docs:
+	 *
+	 * To allow the Android Developer Tools to interact with your view, at a minimum you must provide a constructor that takes
+	 * a Context and an AttributeSet object as parameters. This constructor allows the layout editor to create and edit an
+	 * instance of your view.
+	 */
 	public CustomView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		initAttr(attrs);
+		initAttr(context, attrs);
 		init();
 	}
 	public CustomView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
-		initAttr(attrs);
+		initAttr(context, attrs);
 		init();
 	}
 
@@ -103,6 +104,8 @@ public class CustomView extends View {
 
     public void setNumerator(int numerator) {
         this.numerator = numerator;
+		invalidate();
+		requestLayout();
     }
 
     public int getDenominator() {
@@ -111,11 +114,24 @@ public class CustomView extends View {
 
     public void setDenominator(int denominator) {
         this.denominator = denominator;
+		invalidate();
+		requestLayout();
     }
 
-	private void initAttr(AttributeSet attrs) {
-		numerator = attrs.getAttributeIntValue(NAMESPACE, NUMERATOR, numerator);
-		denominator = attrs.getAttributeIntValue(NAMESPACE, DENOMINATOR, denominator);
+	private void initAttr(Context context, AttributeSet attrs) {
+		TypedArray typedArray = context.getTheme().obtainStyledAttributes(
+				attrs,
+				R.styleable.com_kanawish_perf_hv_CustomView,
+				0, 0);
+		try {
+			numerator = typedArray.getInteger(R.styleable.com_kanawish_perf_hv_CustomView_numerator,1);
+			denominator = typedArray.getInteger(R.styleable.com_kanawish_perf_hv_CustomView_denominator,3);
+		} finally {
+			typedArray.recycle();
+		}
+
+//		numerator = attrs.getAttributeIntValue(NAMESPACE, NUMERATOR, numerator);
+//		denominator = attrs.getAttributeIntValue(NAMESPACE, DENOMINATOR, denominator);
 	}
 
 	private void init() {
