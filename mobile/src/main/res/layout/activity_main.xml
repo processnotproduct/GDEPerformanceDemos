@@ -1,0 +1,74 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                tools:context=".MainActivity">
+
+    <TextView
+        android:text="@string/app_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <!--
+        Concept: Bundle all projects under one roof, but clearly separate them using AndroidManifest and potentially flavours down
+        the road.
+
+        Since one of the goals of this project is to write tutorial content, I could take that opportunity to write gradle flavour
+        posts explaining how to house various things under one roof.
+
+        Projects can be split off into their own branch from this master project as they reach full maturity or become too big.
+     -->1
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+        <Button
+            android:id="@+id/welcome_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Welcome Tour"
+            />
+        <!-- Needed for Perf Video 01 "Intro to Hierarchy Viewer". Will need to also contain an example of a custom view. -->
+        <Button
+            android:id="@+id/hv_inefficient_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Inefficient Nested Hierarchy"
+            />
+        <Button
+            android:id="@+id/hv_efficient_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Efficient Hierarchy"
+            />
+        <!--
+            Would like to measure timings on Renderscript vs pure shader approaches to generating animation.
+
+            Good for perf videos, good for Android demo compo.
+
+            http://en.wikipedia.org/wiki/Motion_aftereffect
+
+         -->
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Shader Motion Aftereffect"
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Renderscript Motion Aftereffect"
+            />
+
+        <!-- http://en.wikipedia.org/wiki/Optical_phenomena -->
+
+        <!-- Up next - Would be nice to incorporate the WearWolf project here. -->
+
+    </LinearLayout>
+
+</RelativeLayout>
