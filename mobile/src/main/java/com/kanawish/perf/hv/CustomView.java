@@ -6,6 +6,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.Html;
 import android.text.Spanned;
@@ -60,14 +61,18 @@ public class CustomView extends View {
 	public static final String NUMERATOR = "numerator";
 
     public static final String FRACTION = "<sup>%s</sup>/<sub>%s</sub>";
+	public static final int TEXT_DIPS = 42;
+	public static final float STEP_SIZE = 0.5f;
 
-    // Styling attributes
+	// Styling attributes
 	private Paint circlePaint;
 	private Paint arcPaint;
 	private TextPaint textPaint;
 	private float diameter;
 	private float centerY;
 	private float centerX;
+
+	StaticLayout staticFractionLayout;
 
 	/**
 	 * Value attributes: see attrs.xml, these are defined in a way that allows customization via .xml attributes
@@ -92,6 +97,7 @@ public class CustomView extends View {
 		initAttr(context, attrs);
 		init();
 	}
+
 	public CustomView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 		initAttr(context, attrs);
@@ -106,6 +112,7 @@ public class CustomView extends View {
         this.numerator = numerator;
 		invalidate();
 		requestLayout();
+		refreshTextLayout();
     }
 
     public int getDenominator() {
@@ -116,8 +123,12 @@ public class CustomView extends View {
         this.denominator = denominator;
 		invalidate();
 		requestLayout();
+		refreshTextLayout();
     }
 
+	/**
+	 * Initialize the attributes, default to 1/3 for demo purposes.
+	 */
 	private void initAttr(Context context, AttributeSet attrs) {
 		TypedArray typedArray = context.getTheme().obtainStyledAttributes(
 				attrs,
@@ -130,14 +141,16 @@ public class CustomView extends View {
 			typedArray.recycle();
 		}
 
-//		numerator = attrs.getAttributeIntValue(NAMESPACE, NUMERATOR, numerator);
-//		denominator = attrs.getAttributeIntValue(NAMESPACE, DENOMINATOR, denominator);
 	}
 
+	/**
+	 * Optimization: It's important to initialize the various 'paints' here, as opposed to doing
+	 * it on-the-fly when drawing, for example.
+	 */
 	private void init() {
-//		Typeface typeface = Typeface.createFromAsset(getContext().getAssets(), "fonts/Pacifico.ttf");
-
 		textPaint = createTextPaint() ;
+		float textSizeInPixels = dipToPixels(TEXT_DIPS);
+		textPaint.setTextSize(textSizeInPixels);
 
 		circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		circlePaint.setStyle(Paint.Style.STROKE);
@@ -148,6 +161,18 @@ public class CustomView extends View {
 		arcPaint = new Paint(circlePaint);
 		arcPaint.setColor(0xFF00AA00); // Green
 		arcPaint.setStrokeWidth(STROKE_WIDTH);
+
+		// The initial call. Will be called again when nominator/denominator change.
+		refreshTextLayout();
+	}
+
+	void refreshTextLayout() {
+		/* Easy optimization
+		Spanned charSequence = Html.fromHtml(String.format(FRACTION, numerator, denominator));
+		staticFractionLayout =
+				new StaticLayout(charSequence, textPaint, (int) diameter, Alignment.ALIGN_CENTER, 1, 1, true);
+
+		*/
 	}
 
 	/**
@@ -167,11 +192,25 @@ public class CustomView extends View {
 	 *
 	 * @param widthMeasureSpec
 	 * @param heightMeasureSpec
+	 *
 	 */
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		int desiredWidth = 100;
-		int desiredHeight = 100;
+
+		// Account for text size, using biggest number, assuming no negative values.
+		int biggest = numerator > denominator ? numerator : denominator ;
+
+		// TODO: We should measure off of StaticLayout instance to get proper needed width.
+		Spanned charSequence = Html.fromHtml(String.format(FRACTION, biggest, biggest));
+		float measuredWidth = textPaint.measureText(charSequence, 0, charSequence.length());
+		// We want the circle to enclose the text rendering box, so:
+		measuredWidth = (float) Math.sqrt( Math.pow(measuredWidth,2) * 2 );
+
+		float xpad = (float)(getPaddingLeft() + getPaddingRight());
+		float ypad = (float)(getPaddingTop() + getPaddingBottom());
+
+		int desiredWidth = (int) (measuredWidth+xpad+STROKE_WIDTH);
+		int desiredHeight = (int) (measuredWidth+ypad+STROKE_WIDTH);
 
 		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
 		int widthSize = MeasureSpec.getSize(widthMeasureSpec);
@@ -181,36 +220,40 @@ public class CustomView extends View {
 		int width;
 		int height;
 
-		//Measure Width
+		// Measure Width
 		if (widthMode == MeasureSpec.EXACTLY) {
-			//Must be this size
+			// Must be this size
 			width = widthSize;
 		} else if (widthMode == MeasureSpec.AT_MOST) {
-			//Can't be bigger than...
+			// Can't be bigger than...
 			width = Math.min(desiredWidth, widthSize);
 		} else {
-			//Be whatever you want
+			// Be whatever you want
 			width = desiredWidth;
 		}
 
-		//Measure Height
+		// Measure Height
 		if (heightMode == MeasureSpec.EXACTLY) {
-			//Must be this size
+			// Must be this size
 			height = heightSize;
 		} else if (heightMode == MeasureSpec.AT_MOST) {
-			//Can't be bigger than...
+			// Can't be bigger than...
 			height = Math.min(desiredHeight, heightSize);
 		} else {
-			//Be whatever you want
+			// Be whatever you want
 			height = desiredHeight;
 		}
 
-		//MUST CALL THIS
+		// MUST CALL THIS
 		setMeasuredDimension(width, height);
     }
 
+	/**
+	 * We're being told what our size is, and was.
+	 */
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+
 		// Account for padding
 		float xpad = (float)(getPaddingLeft() + getPaddingRight());
 		float ypad = (float)(getPaddingTop() + getPaddingBottom());
@@ -228,61 +271,36 @@ public class CustomView extends View {
 	protected void onDraw(Canvas canvas) {
 		float radius = diameter / 2;
 
-        Spanned charSequence = Html.fromHtml(String.format(FRACTION, numerator, denominator));
-        drawText(canvas, centerX - radius, centerY - radius, diameter, diameter, charSequence, textPaint, 42, 0.5f);
+		RectF rect = new RectF(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
+
+		// TODO: Optimize
+		Spanned charSequence = Html.fromHtml(String.format(FRACTION, numerator, denominator));
+		StaticLayout staticLayout =
+			new StaticLayout(charSequence, textPaint, (int) diameter, Alignment.ALIGN_CENTER, 1, 1, true);
+
+		// Visual debugging
+		Rect lineBounds = new Rect();
+		staticLayout.getLineBounds(0,lineBounds);
+
+		float dy = (diameter - staticLayout.getHeight()) / 2;
+
+		canvas.save();
+		canvas.translate(centerX - radius, dy);
+		// canvas.drawRect(lineBounds, circlePaint); // Debug
+		staticLayout.draw(canvas);
+		canvas.restore();
 
         canvas.save();
-
         canvas.drawCircle(centerX, centerY, radius, circlePaint);
-
-        RectF rect = new RectF(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
-//        canvas.drawRect(rect,circlePaint); // Debug
-
 		canvas.drawArc(rect, -90, -360 * (numerator / (float) denominator), false, arcPaint);
-
         canvas.restore();
+
 	}
-
-    // Below is example code from http://andrdev.blogspot.ca/2012/04/drawing-text-on-canvas.html
-    private void drawText(Canvas canvas, float xStart, float yStart,
-                                 float xWidth, float yHeigth, CharSequence textToDisplay,
-                                 TextPaint paintToUse, float startTextSizeInDips,
-                                 float stepSizeForTextSizeSteps) {
-
-        // Text view line spacing multiplier
-        float mSpacingMult = 1.0f;
-        // Text view additional line spacing
-        float mSpacingAdd = 1.0f;
-
-        float startTextSizeInPixels = dipToPixels((int) startTextSizeInDips);
-        StaticLayout l = null;
-        do {
-            paintToUse.setTextSize(startTextSizeInPixels);
-            l = new StaticLayout(textToDisplay, paintToUse, (int) xWidth,
-                    Alignment.ALIGN_CENTER, mSpacingMult, mSpacingAdd, false);
-            startTextSizeInPixels -= stepSizeForTextSizeSteps;
-        } while (l.getHeight() > yHeigth);
-
-
-        float textCenterX = xStart ;//+ (xWidth / 2);
-        float textCenterY = (yHeigth - l.getHeight()) / 2;
-
-        RectF rectF = new RectF();
-        rectF.set(xStart,yStart,xStart+xWidth,yStart+yHeigth);
-
-        canvas.save();
-//        canvas.drawRect(rectF,arcPaint); // Debug
-//        canvas.translate(rectF.left, rectF.top); // Debug
-        canvas.translate(textCenterX, textCenterY);
-        l.draw(canvas);
-        canvas.restore();
-    }
 
     private TextPaint createTextPaint() {
         TextPaint textPaint = new TextPaint();
         textPaint.setColor(Color.WHITE);
         textPaint.setShadowLayer(3, 1, 1, Color.BLACK);
-//        textPaint.setTextAlign(Align.CENTER); // Caused issues!
         textPaint.setAntiAlias(true);
 
         return textPaint;

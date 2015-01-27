@@ -38,7 +38,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="5dp"
-                kanawish:numerator="5"
+                kanawish:numerator="80"
                 kanawish:denominator="10"
                 />
 
