@@ -65,6 +65,7 @@ public class CustomView extends View {
 	public static final float STEP_SIZE = 0.5f;
 
 	// Styling attributes
+	private Paint debugPaint;
 	private Paint circlePaint;
 	private Paint arcPaint;
 	private TextPaint textPaint;
@@ -148,6 +149,12 @@ public class CustomView extends View {
 	 * it on-the-fly when drawing, for example.
 	 */
 	private void init() {
+		debugPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		debugPaint.setStyle(Paint.Style.STROKE);
+		debugPaint.setColor(0xFFFF0000);
+		debugPaint.setStrokeWidth(1);
+		debugPaint.setAntiAlias(true);
+
 		textPaint = createTextPaint() ;
 		float textSizeInPixels = dipToPixels(TEXT_DIPS);
 		textPaint.setTextSize(textSizeInPixels);
@@ -162,17 +169,17 @@ public class CustomView extends View {
 		arcPaint.setColor(0xFF00AA00); // Green
 		arcPaint.setStrokeWidth(STROKE_WIDTH);
 
-		// The initial call. Will be called again when nominator/denominator change.
 		refreshTextLayout();
 	}
 
 	void refreshTextLayout() {
-		/* Easy optimization
+		Spanned measuringCharSequence = Html.fromHtml(String.format(FRACTION, numerator, denominator));
+		float desiredWidth = StaticLayout.getDesiredWidth(measuringCharSequence, textPaint);
+
+		// NOTE: We use the real numbers now, assuming height will be same as the measuring char sequence.
 		Spanned charSequence = Html.fromHtml(String.format(FRACTION, numerator, denominator));
 		staticFractionLayout =
-				new StaticLayout(charSequence, textPaint, (int) diameter, Alignment.ALIGN_CENTER, 1, 1, true);
-
-		*/
+				new StaticLayout(charSequence, textPaint, (int) desiredWidth, Alignment.ALIGN_CENTER, 1, 1, true);
 	}
 
 	/**
@@ -197,20 +204,26 @@ public class CustomView extends View {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-		// Account for text size, using biggest number, assuming no negative values.
+		// Account for text size, using biggest number, assuming it'll have the most digits, ignoring negative values for now.
 		int biggest = numerator > denominator ? numerator : denominator ;
+		// The max desired width.
+		Spanned measuringCharSequence = Html.fromHtml(String.format(FRACTION, biggest, biggest));
+		float desiredLayoutWidth = StaticLayout.getDesiredWidth(measuringCharSequence, textPaint);
+		StaticLayout staticFractionLayout =
+				new StaticLayout(measuringCharSequence, textPaint, (int) desiredLayoutWidth, Alignment.ALIGN_CENTER, 1, 1, true);
 
-		// TODO: We should measure off of StaticLayout instance to get proper needed width.
-		Spanned charSequence = Html.fromHtml(String.format(FRACTION, biggest, biggest));
-		float measuredWidth = textPaint.measureText(charSequence, 0, charSequence.length());
+		// Assumption is that the current staticFractionLayout is always representative when we reach this step.
+		float biggestValue = staticFractionLayout.getHeight()>staticFractionLayout.getWidth()?
+				staticFractionLayout.getHeight():
+				staticFractionLayout.getWidth();
 		// We want the circle to enclose the text rendering box, so:
-		measuredWidth = (float) Math.sqrt( Math.pow(measuredWidth,2) * 2 );
+		float targetDiameter = (float) Math.sqrt( Math.pow(biggestValue,2) * 2 );
 
 		float xpad = (float)(getPaddingLeft() + getPaddingRight());
 		float ypad = (float)(getPaddingTop() + getPaddingBottom());
 
-		int desiredWidth = (int) (measuredWidth+xpad+STROKE_WIDTH);
-		int desiredHeight = (int) (measuredWidth+ypad+STROKE_WIDTH);
+		int desiredWidth = (int) (targetDiameter+xpad+STROKE_WIDTH);
+		int desiredHeight = (int) (targetDiameter+ypad+STROKE_WIDTH);
 
 		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
 		int widthSize = MeasureSpec.getSize(widthMeasureSpec);
@@ -249,7 +262,8 @@ public class CustomView extends View {
     }
 
 	/**
-	 * We're being told what our size is, and was.
+	 * We're being told what our size is, and was. The call to refresh text layout is important
+	 * to assign the right width/diameter to the StaticLayout.
 	 */
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -265,6 +279,8 @@ public class CustomView extends View {
 		diameter = Math.min(ww, hh);
 		centerX = (w / 2) + getPaddingLeft();
 		centerY = (h / 2) + getPaddingTop();
+
+		refreshTextLayout();
 	}
 
 	@Override
@@ -273,21 +289,17 @@ public class CustomView extends View {
 
 		RectF rect = new RectF(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
 
-		// TODO: Optimize
-		Spanned charSequence = Html.fromHtml(String.format(FRACTION, numerator, denominator));
-		StaticLayout staticLayout =
-			new StaticLayout(charSequence, textPaint, (int) diameter, Alignment.ALIGN_CENTER, 1, 1, true);
+		float dx = (diameter - staticFractionLayout.getWidth()) / 2;
+		float dy = (diameter - staticFractionLayout.getHeight()) / 2;
 
 		// Visual debugging
 		Rect lineBounds = new Rect();
-		staticLayout.getLineBounds(0,lineBounds);
-
-		float dy = (diameter - staticLayout.getHeight()) / 2;
+		staticFractionLayout.getLineBounds(0,lineBounds);
 
 		canvas.save();
-		canvas.translate(centerX - radius, dy);
-		// canvas.drawRect(lineBounds, circlePaint); // Debug
-		staticLayout.draw(canvas);
+		canvas.translate(dx, dy);
+		canvas.drawRect(lineBounds, debugPaint); // Debug
+		staticFractionLayout.draw(canvas);
 		canvas.restore();
 
         canvas.save();
