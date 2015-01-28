@@ -1,11 +1,13 @@
 package com.kanawish.perf.welcome;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +24,8 @@ import com.kanawish.perf.R;
  */
 public class WelcomeActivity extends FragmentActivity {
 
+	private static final String TAG = WelcomeActivity.class.getSimpleName();
+
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
 	 * fragments for each of the sections. We use a
@@ -30,12 +34,14 @@ public class WelcomeActivity extends FragmentActivity {
 	 * may be best to switch to a
 	 * {@link android.support.v4.app.FragmentStatePagerAdapter}.
 	 */
-	SectionsPagerAdapter mSectionsPagerAdapter;
+	private SectionsPagerAdapter sectionsPagerAdapter;
 
 	/**
 	 * The {@link ViewPager} that will host the section contents.
 	 */
-	ViewPager mViewPager;
+	private ViewPager viewPager;
+
+	private FractionPageFragment fractionPageFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,35 +50,50 @@ public class WelcomeActivity extends FragmentActivity {
 
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the activity.
-		mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+		sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+		// To be animated, will be hard-coded as page 2 in this example.
+		fractionPageFragment = FractionPageFragment.newInstance(1, 100);
+
+		ViewPager.PageTransformer pageTransformer = new ViewPager.PageTransformer() {
+			@Override
+			public void transformPage(View page, float position) {
+				if( fractionPageFragment.getView() == page ) {
+					// Somewhat wrong since it always will animate, but good for demo purposes.
+					int green = (int) (128f + (127f * position));
+
+					Log.d(TAG, String.format("Animating green: %d",green)); // Logging here causes a bit lag.
+					fractionPageFragment.setBackgroundColor(Color.argb(255, 255, green, 0));
+				}
+			}
+		};
 
 		// Set up the ViewPager with the sections adapter.
-		mViewPager = (ViewPager) findViewById(R.id.pager);
-		mViewPager.setAdapter(mSectionsPagerAdapter);
-
+		viewPager = (ViewPager) findViewById(R.id.pager);
+		viewPager.setAdapter(sectionsPagerAdapter);
+		viewPager.setPageTransformer(false,pageTransformer);
 	}
+
+	/**
+	 * Mostly added this as an enum example for people new to Java.
+	 */
+	enum WelcomePage {
+		PAGE_1(R.layout.welcome_page1),
+		PAGE_2(R.layout.welcome_page2),
+		PAGE_3(R.layout.welcome_page3);
+
+		private final int layoutId;
+
+		WelcomePage(int layoutId) {
+			this.layoutId = layoutId;
+		}
+	};
 
 	/**
 	 * This class is responsible for feeding Fragments to the ViewPager as needed, as
 	 * well as letting it know how many pages are available.
-	 *
 	 */
-	private static class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-		/**
-		 * Mostly added this as an enum example for people new to Java.
-		 */
-		enum WelcomePage {
-			PAGE_1(R.layout.welcome_page1),
-			PAGE_2(R.layout.welcome_page2),
-			PAGE_3(R.layout.welcome_page3);
-
-			private final int layoutId;
-
-			WelcomePage(int layoutId) {
-				this.layoutId = layoutId;
-			}
-		};
+	private class SectionsPagerAdapter extends FragmentPagerAdapter {
 
 		public SectionsPagerAdapter(FragmentManager fm) {
 			super(fm);
@@ -80,6 +101,10 @@ public class WelcomeActivity extends FragmentActivity {
 
 		@Override
 		public Fragment getItem(int position) {
+			// Replace page 2
+			if( position == 1 ) {
+				return fractionPageFragment;
+			}
 			return PageFragment.newInstance(WelcomePage.values()[position].layoutId);
 		}
 

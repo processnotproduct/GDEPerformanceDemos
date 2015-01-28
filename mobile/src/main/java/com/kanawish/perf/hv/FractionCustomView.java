@@ -46,8 +46,10 @@ import static android.text.Layout.Alignment;
 	</quote>
 
  *
+ * FIXME: Known issue, padding is not being taken into account correctly.
+ *
  */
-public class CustomView extends View {
+public class FractionCustomView extends View {
 
 	public static final String NAMESPACE = "http://schemas.android.com/apk/res-auto";
 
@@ -81,7 +83,7 @@ public class CustomView extends View {
     private int numerator = 0 ;
 	private int denominator = 1 ;
 
-	public CustomView(Context context) {
+	public FractionCustomView(Context context) {
 		super(context);
 		init();
 	}
@@ -93,13 +95,13 @@ public class CustomView extends View {
 	 * a Context and an AttributeSet object as parameters. This constructor allows the layout editor to create and edit an
 	 * instance of your view.
 	 */
-	public CustomView(Context context, AttributeSet attrs) {
+	public FractionCustomView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		initAttr(context, attrs);
 		init();
 	}
 
-	public CustomView(Context context, AttributeSet attrs, int defStyleAttr) {
+	public FractionCustomView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 		initAttr(context, attrs);
 		init();
@@ -225,37 +227,8 @@ public class CustomView extends View {
 		int desiredWidth = (int) (targetDiameter+xpad+STROKE_WIDTH);
 		int desiredHeight = (int) (targetDiameter+ypad+STROKE_WIDTH);
 
-		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-		int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-		int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-
-		int width;
-		int height;
-
-		// Measure Width
-		if (widthMode == MeasureSpec.EXACTLY) {
-			// Must be this size
-			width = widthSize;
-		} else if (widthMode == MeasureSpec.AT_MOST) {
-			// Can't be bigger than...
-			width = Math.min(desiredWidth, widthSize);
-		} else {
-			// Be whatever you want
-			width = desiredWidth;
-		}
-
-		// Measure Height
-		if (heightMode == MeasureSpec.EXACTLY) {
-			// Must be this size
-			height = heightSize;
-		} else if (heightMode == MeasureSpec.AT_MOST) {
-			// Can't be bigger than...
-			height = Math.min(desiredHeight, heightSize);
-		} else {
-			// Be whatever you want
-			height = desiredHeight;
-		}
+		int width = resolveSizeAndState(desiredWidth, widthMeasureSpec, 1);
+		int height = resolveSizeAndState(desiredHeight, heightMeasureSpec, 0);
 
 		// MUST CALL THIS
 		setMeasuredDimension(width, height);
@@ -297,8 +270,8 @@ public class CustomView extends View {
 		staticFractionLayout.getLineBounds(0,lineBounds);
 
 		canvas.save();
-		canvas.translate(dx, dy);
-		canvas.drawRect(lineBounds, debugPaint); // Debug
+		canvas.translate(dx+10, dy);
+//		canvas.drawRect(lineBounds, debugPaint); // Debug
 		staticFractionLayout.draw(canvas);
 		canvas.restore();
 

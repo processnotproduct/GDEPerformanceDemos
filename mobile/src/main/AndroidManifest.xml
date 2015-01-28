@@ -15,14 +15,14 @@
 
         <activity android:name=".hv.HVIntroActivity"
                   android:label="Hierarchy Viewer Intro">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <activity android:name=".welcome.WelcomeActivity"
                   android:label="Welcome Tour">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
 
     </application>
