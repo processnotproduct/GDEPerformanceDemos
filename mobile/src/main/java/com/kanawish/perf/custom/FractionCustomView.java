@@ -1,4 +1,4 @@
-package com.kanawish.perf.hv;
+package com.kanawish.perf.custom;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -21,6 +21,9 @@ import com.kanawish.perf.R;
 import static android.text.Layout.Alignment;
 
 /**
+ *
+ * This is an example CustomView for tutorials.
+ *
  * Some useful links if you're looking to create a custom view:
  *
  * http://developer.android.com/training/custom-views/index.html
@@ -113,6 +116,12 @@ public class FractionCustomView extends View {
 
     public void setNumerator(int numerator) {
         this.numerator = numerator;
+		if(this.numerator<0) {
+			arcPaint.setColor(Color.argb(255,220,0,0));
+		} else {
+			arcPaint.setColor(Color.argb(255,0,220,0));
+		}
+
 		invalidate();
 		requestLayout();
 		refreshTextLayout();
@@ -168,7 +177,7 @@ public class FractionCustomView extends View {
 		circlePaint.setAntiAlias(true);
 
 		arcPaint = new Paint(circlePaint);
-		arcPaint.setColor(0xFF00AA00); // Green
+		arcPaint.setColor(Color.GREEN); // Default Green
 		arcPaint.setStrokeWidth(STROKE_WIDTH);
 
 		refreshTextLayout();

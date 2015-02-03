@@ -31,15 +31,15 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:orientation="vertical">
-            <com.kanawish.perf.hv.FractionCustomView
+            <com.kanawish.perf.custom.FractionCustomView
                 android:id="@+id/completionView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:layout_gravity="center"
-                kanawish:numerator="12"
-                kanawish:denominator="20"
+                kanawish:numerator="132"
+                kanawish:denominator="200"
                 />
 
             <ImageButton

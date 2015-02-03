@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.kanawish.perf.R;
-import com.kanawish.perf.hv.FractionCustomView;
+import com.kanawish.perf.custom.FractionCustomView;
 
 /**
  * Created by kanawish on 2015-01-28.
@@ -81,5 +81,8 @@ public class FractionPageFragment extends Fragment {
 		rootLayout.setBackgroundColor(this.backgroundColor);
 	}
 
+	public FractionCustomView getFractionCustomView() {
+		return fractionCustomView;
+	}
 
 }

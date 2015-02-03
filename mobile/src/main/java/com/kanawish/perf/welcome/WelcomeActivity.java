@@ -7,12 +7,12 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.kanawish.perf.R;
+import com.kanawish.perf.custom.FractionCustomView;
 
 /**
  * Based off Android ViewPager template.
@@ -41,30 +41,42 @@ public class WelcomeActivity extends FragmentActivity {
 	 */
 	private ViewPager viewPager;
 
-	private FractionPageFragment fractionPageFragment;
+	private PageFragment page1;
+	private PageFragment page2;
+	private PageFragment page3;
+
+	private FractionCustomView fractionCustomView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.welcome_main);
 
+		fractionCustomView = (FractionCustomView) findViewById(R.id.fractionCustomView);
+		fractionCustomView.setDenominator(100);
+
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the activity.
 		sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
 		// To be animated, will be hard-coded as page 2 in this example.
-		fractionPageFragment = FractionPageFragment.newInstance(1, 100);
+		page1 = PageFragment.newInstance(WelcomePage.values()[0].layoutId);
+		page2 = PageFragment.newInstance(WelcomePage.values()[1].layoutId);
+		page3 = PageFragment.newInstance(WelcomePage.values()[2].layoutId);
 
 		ViewPager.PageTransformer pageTransformer = new ViewPager.PageTransformer() {
 			@Override
 			public void transformPage(View page, float position) {
-				if( fractionPageFragment.getView() == page ) {
-					// Somewhat wrong since it always will animate, but good for demo purposes.
-					int green = (int) (128f + (127f * position));
-
-					Log.d(TAG, String.format("Animating green: %d",green)); // Logging here causes a bit lag.
-					fractionPageFragment.setBackgroundColor(Color.argb(255, 255, green, 0));
+				int green = 0 ;
+				if(page1.getView() == page) {
+					green = (int) (128f + (127f * (1+position)));
+				} else if (page2.getView() == page) {
+					green = (int) (128f + (127f * position));
+					fractionCustomView.setNumerator((int) (100*position));
+				} else if (page3.getView() == page) {
+					green = (int) (128f + (127f * (position-1)));
 				}
+				page.setBackgroundColor(Color.argb(255, 255, green, 0));
 			}
 		};
 
@@ -101,11 +113,15 @@ public class WelcomeActivity extends FragmentActivity {
 
 		@Override
 		public Fragment getItem(int position) {
-			// Replace page 2
-			if( position == 1 ) {
-				return fractionPageFragment;
+			switch(position) {
+				case 0:
+					return page1;
+				case 1:
+					return page2;
+				case 2:
+				default:
+					return page3;
 			}
-			return PageFragment.newInstance(WelcomePage.values()[position].layoutId);
 		}
 
 		@Override
