@@ -27,10 +27,12 @@
 
         <!-- -->
         <LinearLayout
+            android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:orientation="vertical">
+
             <com.kanawish.perf.custom.FractionCustomView
                 android:id="@+id/completionView"
                 android:layout_width="wrap_content"
@@ -38,10 +40,11 @@
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:layout_gravity="center"
-                kanawish:numerator="132"
-                kanawish:denominator="200"
+                kanawish:numerator="42"
+                kanawish:denominator="100"
                 />
 
+<!--
             <ImageButton
                 android:id="@+id/imgButton"
                 style="?android:borderlessButtonStyle"
@@ -50,6 +53,7 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/icn_camera_light"
                 android:layout_gravity="center_horizontal"/>
+-->
 
         </LinearLayout>
 

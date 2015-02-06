@@ -86,6 +86,9 @@ public class FractionCustomView extends View {
     private int numerator = 0 ;
 	private int denominator = 1 ;
 
+	// new attribute
+	private int percentage = 0 ;
+
 	public FractionCustomView(Context context) {
 		super(context);
 		init();
@@ -138,6 +141,17 @@ public class FractionCustomView extends View {
 		refreshTextLayout();
     }
 
+	public int getPercentage() {
+		return percentage;
+	}
+
+	public void setPercentage(int percentage) {
+		this.percentage = percentage;
+		invalidate();
+		requestLayout();
+		refreshTextLayout();
+	}
+
 	/**
 	 * Initialize the attributes, default to 1/3 for demo purposes.
 	 */
@@ -149,6 +163,7 @@ public class FractionCustomView extends View {
 		try {
 			numerator = typedArray.getInteger(R.styleable.com_kanawish_perf_hv_CustomView_numerator,1);
 			denominator = typedArray.getInteger(R.styleable.com_kanawish_perf_hv_CustomView_denominator,3);
+			percentage = typedArray.getInteger(R.styleable.com_kanawish_perf_hv_CustomView_percentage,0);
 		} finally {
 			typedArray.recycle();
 		}
