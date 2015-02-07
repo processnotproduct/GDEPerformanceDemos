@@ -4,6 +4,22 @@ What better teaching material than creating actual useable modules? For the perf
 
 For various perf videos, the idea will be to create a feature branch showing a potential pitfall, and each commit to the given branch bringing us towards efficiency or improvements.
 
+## Custom Views and Profiling Tools
+
+This is the companion code to my in-progress Custom-views + Profiling tool content.
+
+Key classes:
+
+- class **WelcomeActivity.java**
+- class **FractionCustomView.java**
+
+Good links: 
+
+- [Android Performance Pattern G+ community](https://plus.google.com/u/0/communities/116342551728637785407)
+- [Presentation 1](https://www.parleys.com/play/514892290364bc17fc56c533/chapter0/about)
+- [Presentation 2](https://developers.google.com/events/io/2012/sessions/gooio2012/109/)
+
+
 ## 'Ballot' App
 
 [Will re-use code from WearWolf project here.] 
